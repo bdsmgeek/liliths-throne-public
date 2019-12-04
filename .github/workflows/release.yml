@@ -21,10 +21,11 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Bundle Resources
-        run: mkdir /release
-        run: mv /home/runner/work/liliths-throne-public/liliths-throne-public/res /release
-        run: mv /home/runner/work/liliths-throne-public/liliths-throne-public/target/game-1.jar /release/LilithsThrone.jar
-        run: zip -r release.zip /release/*
+        run: |
+          mkdir /release
+          mv /home/runner/work/liliths-throne-public/liliths-throne-public/res /release
+          mv /home/runner/work/liliths-throne-public/liliths-throne-public/target/game-1.jar /release/LilithsThrone.jar
+          zip -r release.zip /release/*
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
