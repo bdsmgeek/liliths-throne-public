@@ -21,7 +21,10 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Bundle Resources
-        run: zip -r release.zip /home/runner/work/liliths-throne-public/liliths-throne-public/res /home/runner/work/liliths-throne-public/liliths-throne-public/target/game-1.jar
+        run: mkdir /release
+        run: mv /home/runner/work/liliths-throne-public/liliths-throne-public/res /release
+        run: mv /home/runner/work/liliths-throne-public/liliths-throne-public/target/game-1.jar /release/LilithsThrone.jar
+        run: zip -r release.zip /release/*
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -40,5 +43,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: release.zip
-          asset_name: LilithsThrone${{ github.ref }}.zip
+          asset_name: LilithsThrone${GITHUB_REF/refs\/tags\//}.zip
           asset_content_type: application/zip
