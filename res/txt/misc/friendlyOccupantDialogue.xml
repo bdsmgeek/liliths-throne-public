@@ -136,6 +136,7 @@
 	]]>
 	</htmlContent>
 	
+	
 	<!-- Dominant sex actions: -->
 	
 	<htmlContent tag="SEX_START"><![CDATA[
@@ -345,9 +346,9 @@
 	</p>
 	<p>
 		#IF(pc.isFeminine())
-			[npc.speech(That's right, now come and take us!)] you [pc.moan], looking back over your shoulder and seductively biting your [pc.lip].
+			[pc.speech(That's right, now come and take us!)] you [pc.moan], looking back over your shoulder and seductively biting your [pc.lip].
 		#ELSE
-			[npc.speech(That's right, now come and take us!)] you [pc.moan], looking back over your shoulder to give [npc.name] a charming grin.
+			[pc.speech(That's right, now come and take us!)] you [pc.moan], looking back over your shoulder to give [npc.name] a charming grin.
 		#ENDIF
 	</p>
 	<p>
@@ -400,12 +401,22 @@
 	</htmlContent>
 	
 	<htmlContent tag="OCCUPANT_TALK_JOB_HUNTING"><![CDATA[
-	<p>
-		Wanting to know if [npc.name] is still searching for a job, you ask [npc.herHim] if [npc.sheHas] applied for anything recently. Smiling happily back at you, [npc.she] tells you that [npc.sheHas] not stopped looking for a job ever since you started befriending [npc.herHim]. Listing off the numerous places that [npc.sheHas] applied for a job at, [npc.name] promises you that [npc.she] will find something soon, at which point, [npc.she] says, [npc.she]'ll start paying rent.
-	</p>
-	<p>
-		Reassuring [npc.herHim] that there's no rush, you tell [npc.name] to keep on trying [npc.her] best, and that [npc.her] diligence and enthusiasm are sure to be rewarded soon.
-	</p>
+	#IF(npc.getDesiredJobs().isEmpty())
+		<p>
+			Wanting to know if [npc.name] is content with remaining unemployed, you ask [npc.herHim] if [npc.she] would prefer to start looking for a job. Smiling back at you, [npc.she] tells you that [npc.she]'ll always be willing to do whatever you think is best, and as you haven't suggested any jobs to [npc.herHim], [npc.sheIs] more than happy to continue simply living in the comfort of this room.
+		</p>
+		<p>
+			[npc.Name] then goes on to admit that [npc.sheIs] feeling a little guilty at the fact that [npc.she] isn't paying any rent, but you put [npc.herHim] at ease by telling [npc.herHim] that you're taking care of all the financial arrangements, and that [npc.she] need not worry about that.
+		</p>
+	#ELSE
+		<p>
+			Wanting to know if [npc.name] is still searching for a job, you ask [npc.herHim] if [npc.sheHas] applied for anything recently. Smiling happily back at you, [npc.she] tells you that [npc.sheHas] not stopped looking for a job ever since you started befriending [npc.herHim]. Listing off the numerous places at which [npc.sheHas] applied for a job, [npc.name] promises you that [npc.she] will find something soon, at which point, [npc.she] says, [npc.she]'ll start paying rent.
+		</p>
+		<p>
+			Reassuring [npc.herHim] that there's no rush, you tell [npc.name] to keep on trying [npc.her] best, and that [npc.her] diligence and enthusiasm are sure to be rewarded soon.
+		</p>
+
+	#ENDIF
 	<p>
 		As [npc.name] thanks you once again for your support and interest in helping [npc.herHim] get back on [npc.her] feet, you wonder what you should talk about next...
 	</p>
@@ -474,49 +485,153 @@
 	</htmlContent>
 	
 	
+	<!-- OCCUPANT_HUG -->
+	
+	<htmlContent tag="OCCUPANT_HUG"><![CDATA[
+	<p>
+		Wanting to show [npc.name] some physical affection, and knowing that [npc.she] likes you enough not to object to it, you [pc.step] forwards and pull [npc.her] into a big hug.
+		#IF(npc.isShy())
+			 Shyly blushing as [npc.she] suddenly finds [npc.herself] in your embrace, [npc.name] starts to return your hug, and although [npc.she] seems nervous about it at first, [npc.she] soon lets out a deep sigh and leans heavily into you. 
+		#ELSE
+			 Caught a little off-guard as [npc.she] suddenly finds [npc.herself] in your embrace, [npc.name] takes a moment before returning your hug, but after letting out a deep sigh [npc.she] soon starts to lean heavily into you.
+		#ENDIF
+	</p>
+	<p>
+		After spending a good a few minutes in your [pc.arms], [npc.name] finally seems to have had enough of your hug, and after slowly pulling back, [npc.she]
+		#IF(npc.isMute())
+			 silently smiles and gazes at you with a look of adoration in [npc.her] [npc.eyes+].
+		#ELSE
+			 smiles at you and says, [npc.speech(Thanks, [pc.name]. I really needed that today...)]
+		#ENDIF
+	</p>
+	<p>
+		Feeling good about what you've just done, you wonder what to say to [npc.name] now...
+	</p>
+	]]>
+	</htmlContent>
+	
+	
+	<!-- OCCUPANT_PETTINGS -->
+	
+	<htmlContent tag="OCCUPANT_PETTINGS"><![CDATA[
+	<p>
+		Knowing that [npc.name] really likes you, and so would be willing to indulge you in some intimate physical contact, you reach forwards and give the top of [npc.her] head a loving stroke.
+		#IF(npc.isShy())
+			#IF(npc.isMute())
+				 Instantly, the mute [npc.race] starts to blush, and although [npc.she] shyly casts her gaze down to the floor and shuffles [npc.her] [npc.feet], [npc.she] makes no attempt to pull away or stop you from touching [npc.herHim] like this.
+			#ELSE
+				 Instantly, the [npc.race] starts to blush, and [npc.she] shyly casts her gaze down to the floor and shuffles [npc.her] [npc.feet] as [npc.she] mutters, [npc.speech([pc.Name]... This is kind of embarrassing... But keep going...)]
+			#ENDIF
+		#ELSE
+			#IF(npc.isMute())
+				 Throwing an amused smile your way, [npc.name] playfully rolls [npc.her] eyes and lets out a sigh, but despite this, [npc.she] makes no attempt to pull away or stop you from touching [npc.herHim].
+			#ELSE
+				 Throwing an amused smile your way, [npc.name] playfully rolls [npc.her] eyes and sighs, [npc.speech(You know that this is kind of embarrassing, right? Seeing as it's you, I guess I'll put up with it...)]
+			#ENDIF
+		#ENDIF
+	</p>
+	<p>
+		Encouraged by [npc.namePos] reaction, you continue petting
+		#IF(npc.hasHair())
+			 the top of [npc.her] head, and at [npc.her] request, you move on to stroke [npc.her] [npc.hair+].
+		#ELSE
+			 the top of [npc.her] head, and after just a moment [npc.she] starts leaning into your touch.
+		#ENDIF
+		#IF(npc.getEarCovering().getCategory()==BODY_COVERING_CATEGORY_MAIN_FUR)
+			 Unable to resist, you then move your [pc.fingers] down to [npc.namePos] furry ears and start playfully petting and stroking them.
+		#ELSEIF(npc.getEarCovering().getCategory()==BODY_COVERING_CATEGORY_MAIN_FEATHER)
+			 Unable to resist, you then move your [pc.fingers] down to [npc.namePos] ear feathers and start playfully stroking them.
+		#ENDIF
+		#IF(npc.isMute())
+			 Clearly liking this attention, [npc.name] closes [npc.her] eyes and starts letting out contented little sighs.
+		#ELSE
+			 Clearly liking this attention, [npc.name] closes [npc.her] eyes and starts letting out contented little sighs, before muttering, [npc.speech(More... Yes, like that...)]
+		#ENDIF
+	</p>
+	#IF(npc.getTailType().isSuitableForSleepHugging())
+		<p>
+			#IF(npc.getTailCount()>1)
+				 While petting [npc.namePos] head, you've noticed how [npc.her] [npc.tail+] has been slowly swishing from side to side behind [npc.herHim]. Knowing that [npc.name] is sure to indulge you in your desire, you move your attention away from [npc.her] head and reach down to give [npc.her] [npc.tail+] a loving stroke. Opening [npc.her] [npc.eyes] and gasping in shock, [npc.name] instinctively lifts up [npc.her] tail, which inadvertently allows you to stroke it even more. Quickly calming down as [npc.she] takes in the situation, [npc.name] willingly turns around and pushes [npc.her] [npc.tail] back towards you, allowing you to spend the next several minutes stroking and hugging it.
+			#ELSE
+				 While petting [npc.namePos] head, you've noticed how [npc.her] [npc.tails+] have been slowly swishing from side to side behind [npc.herHim]. Knowing that [npc.name] is sure to indulge you in your desire, you move your attention away from [npc.her] head and reach down to give the closet of [npc.her] [npc.tails+] a loving stroke. Opening [npc.her] [npc.eyes] and gasping in shock, [npc.name] instinctively lifts up [npc.her] tails, which inadvertently allows you to stroke
+				#IF(npc.getTailCount()==2)
+					 both of them
+				#ELSE
+					 all of them
+				#ENDIF
+				of them at the same time. Quickly calming down as [npc.she] takes in the situation, [npc.name] willingly turns around and pushes [npc.her] [npc.tails] back towards you, allowing you to spend the next several minutes stroking and hugging them.
+			#ENDIF
+		</p>
+	#ENDIF
+	<p>
+		After ten minutes of petting [npc.name] in this manner, you finally sense that [npc.sheHas] had enough, and after [pc.stepping] back and giving [npc.herHim] some personal space, you wonder what to say to [npc.her] next...
+	</p>
+	]]>
+	</htmlContent>
+	
+	
 	<!-- OCCUPANT_JOB_SUGGESTION -->
 	
 	<htmlContent tag="OCCUPANT_JOB_SUGGESTION_CHANGE"><![CDATA[
 	<p>
-		Although [npc.name] is currently employed, you aren't sure if working as [npc.a_job] is really suitable for [npc.herHim]. Knowing that [npc.she] trusts your opinion, you wonder if you should suggest that [npc.she] starts looking for a different job...
+		Although [npc.name] is currently employed, you aren't sure if working as [npc.a_job] is really suitable for [npc.herHim]. Knowing that [npc.she] trusts your opinion, you ask [npc.herHim] how [npc.she]'d feel about looking for a different job.
+	</p>
+	<p>
+		#IF(npc.isShy())
+			Casting [npc.her] gaze to the floor, [npc.name] shyly shuffles [npc.her] [npc.feet] as [npc.she] replies, [npc.speech(Well, if you think that a job change would be good for me, [pc.name... I'll start looking for whatever you suggest right away...)]
+		#ELSE
+			Letting out a contemplative hum, [npc.name] replies, [npc.speech(You know, [pc.name], I <i>had</i> been thinking about a change of job... I'll start looking for whatever you suggest right away!)]
+		#ENDIF
 	</p>
 	]]>
 	</htmlContent>
 	
 	<htmlContent tag="OCCUPANT_JOB_SUGGESTION"><![CDATA[
 	<p>
-		Although [npc.name] is currently looking for a job, you aren't sure if [npc.sheIs] going to end up finding one that's suitable for [npc.herHim]. Knowing that [npc.she] trusts your opinion, you wonder if you should suggest the sort of job that [npc.she] should be looking for...
-	</p>
-	]]>
-	</htmlContent>
-	
-	
-	<!-- OCCUPANT_JOB_SUGGESTION_MADE -->
-	
-	<htmlContent tag="OCCUPANT_JOB_SUGGESTION_MADE_CHANGE"><![CDATA[
-	<p>
-		Not liking the fact that [npc.name] is working as [npc.a_job], you suggest to [npc.herHim] that [npc.she] should start looking for a job as [npc.a_desiredJob].
+		Although [npc.name] is currently looking for a job, you aren't sure if [npc.sheIs] going to end up finding one that's suitable for [npc.herHim]. Knowing that [npc.she] trusts your opinion, you ask [npc.herHim] how [npc.she]'d feel about looking for a job that you were to suggest.
 	</p>
 	<p>
 		#IF(npc.isShy())
-			Casting [npc.her] gaze to the floor, [npc.name] shyly shuffles [npc.her] [npc.feet] as [npc.she] replies to your suggestion, [npc.speech(Oh, well, if you think that's for the best, [pc.name]... I'll start looking for an opening as [npc.a_desiredJob] right away...)]
+			Casting [npc.her] gaze to the floor, [npc.name] shyly shuffles [npc.her] [npc.feet] as [npc.she] replies, [npc.speech(Well, I'll listen to whatever you suggest, [pc.name]... Just let me know what I should be looking for...)]
 		#ELSE
-			Letting out a contemplative hum, [npc.name] replies to your suggestion, [npc.speech(You know, [pc.name], I <i>had</i> been thinking about a change of job... I'll start looking for an opening as [npc.a_desiredJob] right away!)]
+			Letting out a contemplative hum, [npc.name] replies, [npc.speech(You know, [pc.name], it really would be a great help if you were to suggest some jobs for me. Just let me know what I should be looking for!)]
 		#ENDIF
 	</p>
 	]]>
 	</htmlContent>
 	
-	<htmlContent tag="OCCUPANT_JOB_SUGGESTION_MADE"><![CDATA[
+	<htmlContent tag="OCCUPANT_JOB_SUGGESTION_MECHANICS"><![CDATA[
 	<p>
-		Thinking that you have the perfect suggestion for [npc.name], you tell [npc.herHim] that [npc.she] should start looking for a job as [npc.a_desiredJob].
+		<i>
+		#IF(npc.hasJob())
+			[npc.Name] will search for job openings of the types highlighted in [style.colourMinorGood(green)], and once [npc.sheHas] found one, [npc.she] will switch jobs to that one.
+		#ELSE
+			[npc.Name] will search for job openings of the types highlighted in [style.colourMinorGood(green)].
+			#IF(npc.getDesiredJobs().isEmpty())
+				 As [style.colourBad(no jobs are selected)], [npc.she] will not perform any searches and will [style.colourBad(remain unemployed until you make at least one suggestion)].
+			#ELSE
+				 If no jobs are selected, [npc.she] will not perform any searches and will remain unemployed.
+			#ENDIF
+		#ENDIF
+		</i>
+	</p>
+	]]>
+	</htmlContent>
+	
+	
+	<htmlContent tag="OCCUPANT_JOB_QUIT"><![CDATA[
+	<p>
+		Thinking that it would be a good idea for [npc.name] to give up on [npc.her] job as [npc.a_job], you tell [npc.herHim] that [npc.she] would be better off quitting and then holding off on searching for a new job until you give [npc.her] some suggestions.
 	</p>
 	<p>
 		#IF(npc.isShy())
-			Casting [npc.her] gaze to the floor, [npc.name] shyly shuffles [npc.her] [npc.feet] as [npc.she] replies, [npc.speech(Oh, well, if you think that's for the best, [pc.name]... I'll start looking for an opening as [npc.a_desiredJob] right away...)]
+			Letting out a small sigh of relief, [npc.name] nervously smiles as [npc.she] admits, [npc.speech(I didn't want to say anything, but I'd already been thinking about quitting... Thanks for suggesting this, [pc.name]... We can spend more time together now that I don't have to worry about work!)]
 		#ELSE
-			Letting out a contemplative hum, [npc.name] replies, [npc.speech(You know, [pc.name], I <i>had</i> been thinking about that sort of thing... I'll start looking for an opening as [npc.a_desiredJob] right away!)]
+			Letting out a relieved sigh, [npc.name] smiles as [npc.she] admits, [npc.speech(You know, I didn't want to say anything, but I'd already been thinking about quitting. Thanks for suggesting this, [pc.name], it really is a huge weight off my mind. We can also spend more time together now that I don't have to worry about work!)]
 		#ENDIF
+	</p>
+	<p style='text-align:center;'>
+		[style.italicsMinorBad([npc.Name] will remain unemployed until you make some job suggestions.)]
 	</p>
 	]]>
 	</htmlContent>
@@ -579,7 +694,7 @@
 		You feel as though the time has come to kick [npc.name] out. Stepping towards [npc.herHim], you put on your most authoritative tone as you state, [pc.speech(You're going to have to leave, [npc.name]. I can't support you here any longer.)]
 	</p>
 	<p>
-		[npc.speech(I understand,)] [npc.name] replies, casting [npc.her] gaze down at the floor as [npc.she] quickly gathers what few possessions [npc.she] has. Having got all of [npc.her] things together in less than a minute, [npc.she] turns to face you with a big smile on [npc.her] face. [npc.speech(Thank you for everything, [npc.pcName]! I've been thinking ever since I got here about what I'll do next, and I've decided to leave Dominion for good. I'm not sure where I'll go, but anywhere's better than city.)]
+		[npc.speech(I understand,)] [npc.name] replies, casting [npc.her] gaze down at the floor as [npc.she] quickly gathers what few possessions [npc.sheHasFull]. Having got all of [npc.her] things together in less than a minute, [npc.she] turns to face you with a big smile on [npc.her] face. [npc.speech(Thank you for everything, [npc.pcName]! I've been thinking ever since I got here about what I'll do next, and I've decided to leave Dominion for good. I'm not sure where I'll go, but anywhere's better than city.)]
 	</p>
 	<p>
 		You escort [npc.name] down to the front entrance, where [npc.she] turns to say one final farewell, [npc.speech(Really, thank you, [npc.pcName]. You've helped me to start a new chapter in my life, and I'll always remember you.)]

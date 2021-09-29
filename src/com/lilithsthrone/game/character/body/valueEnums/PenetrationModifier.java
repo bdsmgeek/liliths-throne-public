@@ -1,30 +1,85 @@
 package com.lilithsthrone.game.character.body.valueEnums;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.lilithsthrone.game.sex.SexAreaPenetration;
+import com.lilithsthrone.utils.Util;
+
 /**
  * @since 0.1.83
- * @version 0.1.95
+ * @version 0.4
  * @author Innoxia
  */
 public enum PenetrationModifier {
 
-	SHEATHED("sheathed"),
-	RIBBED("ribbed"),
-	TENTACLED("tentacled"),
-	KNOTTED("knotted"),
-	TAPERED("tapered"),
-	BLUNT("blunt"),
-	FLARED("flared"),
-	BARBED("barbed"),
-	VEINY("veiny"),
-	PREHENSILE("prehensile");
+	SHEATHED("sheathed", "Helps to hide bulge in clothing when not erect."),
 	
-	private String descriptor;
+	RIBBED("ribbed", ""),
+	
+	TENTACLED("tentacled", ""),
+	
+	KNOTTED("knotted", "Grants ability to be pushed inside an orifice at the moment of orgasm, doubling effective diameter and locking partners together. (Requires orifice to be deep enough for knotted base to be inserted.)"),
+	
+	TAPERED("tapered", "Reduces effective diameter by 5%."),
+	
+	BLUNT("blunt", ""),
+	
+	FLARED("flared", "Increases effective diameter by 5%."),
+	
+	BARBED("barbed", ""),
+	
+	VEINY("veiny", ""),
+	
+	PREHENSILE("prehensile", ""),
+	
+	OVIPOSITOR("ovipositor",
+			"Grants ability to lay eggs in the currently-penetrated orifice at the moment of orgasm. (Requires an egg-laying vagina and for the eggs to already be fertilised. Eggs cannot be laid in an already-pregnant target's vagina.)",
+			Util.newArrayListOfValues(
+					SexAreaPenetration.PENIS,
+					SexAreaPenetration.CLIT));
+	
+	private String name;
+	private String description;
+	private List<SexAreaPenetration> restrictedPenetrationTypes;
 
-	private PenetrationModifier(String descriptor) {
-		this.descriptor = descriptor;
+	private PenetrationModifier(String name, String description) {
+		this(name, description, null);
+	}
+	
+	private PenetrationModifier(String name, String description, List<SexAreaPenetration> restrictedPenetrationTypes) {
+		this.name = name;
+		this.description = description;
+		this.restrictedPenetrationTypes = restrictedPenetrationTypes;
+	}
+	
+	public static List<PenetrationModifier> getPenetrationModifiers() {
+		return getPenetrationModifiers(null);
+	}
+	
+	public static List<PenetrationModifier> getPenetrationModifiers(SexAreaPenetration penetrationType) {
+		List<PenetrationModifier> penetrationModifiers = new ArrayList<>(Arrays.asList(PenetrationModifier.values()));
+		penetrationModifiers.removeIf(pm->pm.getRestrictedPenetrationTypes()!=null && penetrationType!=null && !pm.getRestrictedPenetrationTypes().contains(penetrationType));
+		return penetrationModifiers;
 	}
 
 	public String getName() {
-		return descriptor;
+		return name;
+	}
+	
+	public boolean isSpecialEffects() {
+		return !description.isEmpty();
+	}
+	
+	public String getDescription() {
+		if(description.isEmpty()) {
+			return "No gameplay effect.";
+		}
+		return description;
+	}
+
+	public List<SexAreaPenetration> getRestrictedPenetrationTypes() {
+		return restrictedPenetrationTypes;
 	}
 }

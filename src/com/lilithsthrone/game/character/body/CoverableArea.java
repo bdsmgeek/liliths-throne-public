@@ -15,80 +15,81 @@ import com.lilithsthrone.utils.Util;
 public enum CoverableArea {
 	
 	// Utility value
-	NONE("none",
+	NONE(false,
+			"none",
 			new ArrayList<>()),
 
-	HANDS("hands",
+	HANDS(false,
+			"hands",
 			Util.newArrayListOfValues(
 					InventorySlot.FINGER,
 					InventorySlot.HAND,
 					InventorySlot.WRIST)),
 	
-	ASS("ass",
+	ASS(true,
+			"ass",
 			Util.newArrayListOfValues(
 					InventorySlot.GROIN,
 					InventorySlot.ANUS,
 					InventorySlot.LEG,
 					InventorySlot.TAIL)),
 	
-	ANUS("asshole",
+	ANUS(true,
+			"asshole",
 			Util.newArrayListOfValues(
 					InventorySlot.GROIN,
 					InventorySlot.ANUS)),
 
-	STOMACH("stomach",
+	STOMACH(false,
+			"stomach",
 			Util.newArrayListOfValues(
 					InventorySlot.STOMACH,
 					InventorySlot.TORSO_UNDER,
 					InventorySlot.TORSO_OVER)),
 	
-	BACK("back",
+	BACK(false,
+			"back",
 			Util.newArrayListOfValues(
 					InventorySlot.TORSO_UNDER,
 					InventorySlot.TORSO_OVER,
 					InventorySlot.WINGS,
 					InventorySlot.TAIL)),
 	
-	LEGS("legs",
+	LEGS(false,
+			"legs",
 			Util.newArrayListOfValues(
 					InventorySlot.LEG,
 					InventorySlot.SOCK)) {
-		public boolean isPhysicallyAvailable(GameCharacter owner) {
-			switch(owner.getLegConfiguration()) {
-				case ARACHNID:
-				case BIPEDAL:
-				case CEPHALOPOD:
-				case TAUR:
-					return true;
-				case TAIL:
-				case TAIL_LONG:
-					return false;
-			}
-			return true;
-		}
+//		public boolean isPhysicallyAvailable(GameCharacter owner) {
+//			return owner.hasLegs();
+//		}
 	},
 	
-	FEET("feet",
+	FEET(false,
+			"feet",
 			Util.newArrayListOfValues(
 					InventorySlot.FOOT,
 					InventorySlot.ANKLE,
 					InventorySlot.SOCK)) {
 		public boolean isPhysicallyAvailable(GameCharacter owner) {
-			return LEGS.isPhysicallyAvailable(owner);
+			return owner.hasLegs();
 		}
 	},
 	
-	THIGHS("thighs",
+	THIGHS(false,
+			"thighs",
 			Util.newArrayListOfValues(
 					InventorySlot.LEG,
-					InventorySlot.SOCK)) {
+					InventorySlot.GROIN)) {
 		public boolean isPhysicallyAvailable(GameCharacter owner) {
-			return LEGS.isPhysicallyAvailable(owner);
+			return owner.hasLegs();
 		}
 	},
 	
-	VAGINA("pussy",
+	VAGINA(true,
+			"pussy",
 			Util.newArrayListOfValues(
+					InventorySlot.VAGINA,
 					InventorySlot.GROIN,
 					InventorySlot.LEG)) {
 		public boolean isPhysicallyAvailable(GameCharacter owner) {
@@ -96,7 +97,8 @@ public enum CoverableArea {
 		}
 	},
 	
-	MOUND("mound",
+	MOUND(true,
+			"mound",
 			Util.newArrayListOfValues(
 					InventorySlot.GROIN,
 					InventorySlot.LEG)) {
@@ -105,7 +107,19 @@ public enum CoverableArea {
 		}
 	},
 	
-	PENIS("cock",
+	PENIS(true,
+			"cock",
+			Util.newArrayListOfValues(
+					InventorySlot.PENIS,
+					InventorySlot.GROIN,
+					InventorySlot.LEG)) {
+		public boolean isPhysicallyAvailable(GameCharacter owner) {
+			return owner.hasPenis();
+		}
+	},
+	
+	TESTICLES(true,
+			"balls",
 			Util.newArrayListOfValues(
 					InventorySlot.GROIN,
 					InventorySlot.LEG)) {
@@ -114,30 +128,24 @@ public enum CoverableArea {
 		}
 	},
 	
-	TESTICLES("balls",
-			Util.newArrayListOfValues(
-					InventorySlot.GROIN,
-					InventorySlot.LEG)) {
-		public boolean isPhysicallyAvailable(GameCharacter owner) {
-			return owner.hasPenis();
-		}
-	},
-	
-	BREASTS("breasts",
+	BREASTS(true,
+			"breasts",
 			Util.newArrayListOfValues(
 					InventorySlot.CHEST,
 					InventorySlot.NIPPLE,
 					InventorySlot.TORSO_UNDER,
 					InventorySlot.TORSO_OVER)),
 	
-	NIPPLES("nipples",
+	NIPPLES(true,
+			"nipples",
 			Util.newArrayListOfValues(
 					InventorySlot.CHEST,
 					InventorySlot.NIPPLE,
 					InventorySlot.TORSO_UNDER,
 					InventorySlot.TORSO_OVER)),
 	
-	BREASTS_CROTCH("crotch-breasts",
+	BREASTS_CROTCH(true,
+			"crotch-breasts",
 			Util.newArrayListOfValues(
 					InventorySlot.STOMACH,
 					InventorySlot.GROIN,
@@ -158,7 +166,8 @@ public enum CoverableArea {
 		}
 	},
 	
-	NIPPLES_CROTCH("crotch-nipples",
+	NIPPLES_CROTCH(true,
+			"crotch-nipples",
 			null) {
 		public boolean isPhysicallyAvailable(GameCharacter owner) {
 			return owner.hasBreastsCrotch();
@@ -168,13 +177,15 @@ public enum CoverableArea {
 		}
 	},
 
-	HAIR("hair",
+	HAIR(false,
+			"hair",
 			Util.newArrayListOfValues(
 					InventorySlot.HAIR,
 					InventorySlot.HORNS,
 					InventorySlot.HEAD)),
 	
-	MOUTH("mouth",
+	MOUTH(true,
+			"mouth",
 			Util.newArrayListOfValues(
 					InventorySlot.HAIR,
 					InventorySlot.HORNS,
@@ -184,12 +195,22 @@ public enum CoverableArea {
 					InventorySlot.NECK));
 
 	
+	private boolean saveDiscoveredStatus;
 	private String name;
 	private List<InventorySlot> associatedInventorySlots;
 
-	private CoverableArea(String name, List<InventorySlot> associatedInventorySlots) {
+	private CoverableArea(boolean saveDiscoveredStatus, String name, List<InventorySlot> associatedInventorySlots) {
+		setSaveDiscoveredStatus(saveDiscoveredStatus);
 		this.name = name;
 		this.associatedInventorySlots = associatedInventorySlots;
+	}
+
+	public boolean isSaveDiscoveredStatus() {
+		return saveDiscoveredStatus;
+	}
+
+	public void setSaveDiscoveredStatus(boolean saveDiscoveredStatus) {
+		this.saveDiscoveredStatus = saveDiscoveredStatus;
 	}
 
 	public String getName() {

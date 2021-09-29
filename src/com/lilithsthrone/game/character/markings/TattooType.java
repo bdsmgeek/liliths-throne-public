@@ -6,13 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import com.lilithsthrone.utils.ColourListPresets;
+import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.utils.Util;
+import com.lilithsthrone.utils.colours.ColourListPresets;
 
 /**
  * @since 0.2.6
- * @version 0.2.8
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class TattooType {
@@ -75,6 +77,15 @@ public class TattooType {
 	public static String getIdFromTattooType(AbstractTattooType tattooType) {
 		return tattooToIdMap.get(tattooType);
 	}
+
+	/**
+	 * @return A list of tattoos which the target has available to them.
+	 */
+	public static List<AbstractTattooType> getConditionalTattooTypes(GameCharacter target) {
+		List<AbstractTattooType> tattoos = getAllTattooTypes();
+		tattoos.removeIf(tattoo -> !tattoo.isAvailable(target));
+		return tattoos;
+	}
 	
 	public static List<AbstractTattooType> getAllTattooTypes() {
 		List<AbstractTattooType> allTattoos = new ArrayList<>(tattooToIdMap.keySet());
@@ -86,71 +97,42 @@ public class TattooType {
 	
 	static {
 		
-		File dir = new File("res/mods");
+		// Modded tattoo types:
 		
-		if (dir.exists() && dir.isDirectory()) {
-			File[] modDirectoryListing = dir.listFiles();
-			if (modDirectoryListing != null) {
-				for (File modAuthorDirectory : modDirectoryListing) {
-					File modAuthorClothingDirectory = new File(modAuthorDirectory.getAbsolutePath()+"/items/tattoos");
-					
-					File[] clothingDirectoriesListing = modAuthorClothingDirectory.listFiles();
-					if (clothingDirectoriesListing != null) {
-						for (File clothingDirectory : clothingDirectoriesListing) {
-							if (clothingDirectory.isDirectory()){
-								File[] innerDirectoryListing = clothingDirectory.listFiles((path, filename) -> filename.endsWith(".xml"));
-								if (innerDirectoryListing != null) {
-									for (File innerChild : innerDirectoryListing) {
-										try {
-											AbstractTattooType ct = new AbstractTattooType(innerChild) {};
-											String id = modAuthorDirectory.getName()+"_"+innerChild.getParentFile().getName()+"_"+innerChild.getName().split("\\.")[0];
-	//										System.out.println(id);
-											tattooToIdMap.put(ct, id);
-											idToTattooMap.put(id, ct);
-										} catch(Exception ex) {
-											System.err.println("Loading modded tattoo failed in 'mod folder tattoos'. File path: "+innerChild.getAbsolutePath());
-										}
-									}
-								}
-							}
-						}
-					}
+		Map<String, Map<String, File>> moddedFilesMap = Util.getExternalModFilesById("/items/tattoos");
+		for(Entry<String, Map<String, File>> entry : moddedFilesMap.entrySet()) {
+			for(Entry<String, File> innerEntry : entry.getValue().entrySet()) {
+				try {
+					AbstractTattooType tattoo = new AbstractTattooType(innerEntry.getValue()) {};
+					tattooToIdMap.put(tattoo, innerEntry.getKey());
+					idToTattooMap.put(innerEntry.getKey(), tattoo);
+				} catch(Exception ex) {
+					System.err.println("Loading modded tattoo failed at 'TattooType'. File path: "+innerEntry.getValue().getAbsolutePath());
+					System.err.println("Actual exception: ");
+					ex.printStackTrace(System.err);
 				}
 			}
 		}
 		
-		
-		// Add in external res tattoos:
-		
-		dir = new File("res/tattoos");
-		
-		if (dir.exists() && dir.isDirectory()) {
-			File[] authorDirectoriesListing = dir.listFiles();
-			if (authorDirectoriesListing != null) {
-				for (File authorDirectory : authorDirectoriesListing) {
-					if (authorDirectory.isDirectory()){
-						for (File clothingDirectory : authorDirectory.listFiles()) {
-							if (clothingDirectory.isDirectory()){
-								File[] innerDirectoryListing = clothingDirectory.listFiles((path, filename) -> filename.endsWith(".xml"));
-								if (innerDirectoryListing != null) {
-									for (File innerChild : innerDirectoryListing) {
-										try {
-											AbstractTattooType ct = new AbstractTattooType(innerChild) {};
-											String id = authorDirectory.getName()+"_"+innerChild.getParentFile().getName()+"_"+innerChild.getName().split("\\.")[0];
-											tattooToIdMap.put(ct, id);
-											idToTattooMap.put(id, ct);
-										} catch(Exception ex) {
-											System.err.println("Loading modded tattoo failed in 'external res tattoos'. File path: "+innerChild.getAbsolutePath());
-										}
-									}
-								}
-							}
-						}
-					}
+		// External res tattoo types:
+
+		Map<String, Map<String, File>> filesMap = Util.getExternalFilesById("res/tattoos");
+		for(Entry<String, Map<String, File>> entry : filesMap.entrySet()) {
+			for(Entry<String, File> innerEntry : entry.getValue().entrySet()) {
+				try {
+					AbstractTattooType tattoo = new AbstractTattooType(innerEntry.getValue()) {};
+					tattooToIdMap.put(tattoo, innerEntry.getKey());
+					idToTattooMap.put(innerEntry.getKey(), tattoo);
+//					System.out.println("TT: "+innerEntry.getKey());
+				} catch(Exception ex) {
+					System.err.println("Loading tattoo failed at 'TattooType'. File path: "+innerEntry.getValue().getAbsolutePath());
+					System.err.println("Actual exception: ");
+					ex.printStackTrace(System.err);
 				}
 			}
 		}
-		
+
+		// Hard-coded tattoo types (all those up above):
 		
 		Field[] fields = TattooType.class.getFields();
 		

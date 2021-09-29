@@ -4,18 +4,21 @@ import java.util.Map;
 
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.ArousalLevel;
+import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
-import com.lilithsthrone.game.sex.Sex;
+import com.lilithsthrone.game.sex.ImmobilisationType;
 import com.lilithsthrone.game.sex.SexControl;
 import com.lilithsthrone.game.sex.managers.SexManagerDefault;
 import com.lilithsthrone.game.sex.positions.SexPositionUnique;
 import com.lilithsthrone.game.sex.positions.slots.SexSlot;
 import com.lilithsthrone.game.sex.sexActions.SexActionInterface;
-import com.lilithsthrone.game.sex.sexActions.dominion.CultistSexActions;
+import com.lilithsthrone.game.sex.sexActions.baseActionsMisc.GenericActions;
+import com.lilithsthrone.main.Main;
+import com.lilithsthrone.utils.Util.Value;
 
 /**
  * @since 0.1.88
- * @version 0.3.4
+ * @version 0.4
  * @author Innoxia
  */
 public class SMAltarMissionary extends SexManagerDefault {
@@ -27,28 +30,29 @@ public class SMAltarMissionary extends SexManagerDefault {
 	}
 	
 	@Override
-	public SexActionInterface getPartnerSexAction(SexActionInterface sexActionPlayer) {
+	public SexActionInterface getPartnerSexAction(NPC partner, SexActionInterface sexActionPlayer) {
 		// If orgasming, use an orgasm action:
-		if (ArousalLevel.getArousalLevelFromValue(Sex.getCharacterPerformingAction().getArousal()) == ArousalLevel.FIVE_ORGASM_IMMINENT) {
-			return super.getPartnerSexAction(sexActionPlayer);
+		if (ArousalLevel.getArousalLevelFromValue(Main.sex.getCharacterPerformingAction().getArousal()) == ArousalLevel.FIVE_ORGASM_IMMINENT) {
+			return super.getPartnerSexAction(partner, sexActionPlayer);
 		}
 		
-		if(Sex.isCharacterSealed(Sex.getCharacterPerformingAction())) {
-			return CultistSexActions.SEALED;
+		Value<ImmobilisationType, GameCharacter> value = Main.sex.getImmobilisationType(Main.sex.getCharacterPerformingAction());
+		if(value!=null && value.getKey()==ImmobilisationType.WITCH_SEAL) {
+			return GenericActions.WITCH_SEALED;
 			
 		} else {
-			return super.getPartnerSexAction(sexActionPlayer);
+			return super.getPartnerSexAction(partner, sexActionPlayer);
 		}
 	}
 	
 	@Override
 	public boolean isAbleToRemoveSelfClothing(GameCharacter character) {
-		return !Sex.isCharacterSealed(character);
+		return !Main.sex.isCharacterImmobilised(character);
 	}
 
 	@Override
 	public boolean isAbleToRemoveOthersClothing(GameCharacter character, AbstractClothing clothing) {
-		return !Sex.isCharacterSealed(character);
+		return !Main.sex.isCharacterImmobilised(character);
 	}
 	
 	@Override
@@ -58,7 +62,7 @@ public class SMAltarMissionary extends SexManagerDefault {
 
 	@Override
 	public SexControl getSexControl(GameCharacter character) {
-		if(!Sex.isDom(character) && character.isPlayer()) {
+		if(!Main.sex.isDom(character) && character.isPlayer()) {
 			return SexControl.ONGOING_ONLY;
 		}
 		return super.getSexControl(character);

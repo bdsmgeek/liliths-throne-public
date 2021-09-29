@@ -3,8 +3,6 @@ package com.lilithsthrone.game.dialogue.npcDialogue.submission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.lilithsthrone.game.PropertyValue;
 import com.lilithsthrone.game.character.GameCharacter;
@@ -14,8 +12,8 @@ import com.lilithsthrone.game.character.body.CoverableArea;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.NPCFlagValue;
-import com.lilithsthrone.game.character.npc.misc.Elemental;
 import com.lilithsthrone.game.character.quests.QuestLine;
+import com.lilithsthrone.game.dialogue.DialogueFlags;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.npcDialogue.QuickTransformations;
 import com.lilithsthrone.game.dialogue.responses.Response;
@@ -26,16 +24,15 @@ import com.lilithsthrone.game.dialogue.responses.ResponseTag;
 import com.lilithsthrone.game.dialogue.utils.BodyChanging;
 import com.lilithsthrone.game.dialogue.utils.InventoryInteraction;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
-import com.lilithsthrone.game.inventory.enchanting.ItemEffect;
-import com.lilithsthrone.game.inventory.item.AbstractItemType;
+import com.lilithsthrone.game.inventory.item.FetishPotion;
+import com.lilithsthrone.game.inventory.item.TransformativePotion;
 import com.lilithsthrone.game.occupantManagement.OccupancyUtil;
-import com.lilithsthrone.game.sex.Sex;
 import com.lilithsthrone.game.sex.SexControl;
 import com.lilithsthrone.game.sex.managers.universal.SMGeneric;
 import com.lilithsthrone.main.Main;
-import com.lilithsthrone.utils.Colour;
 import com.lilithsthrone.utils.Util;
-import com.lilithsthrone.utils.Util.Value;
+import com.lilithsthrone.utils.colours.Colour;
+import com.lilithsthrone.utils.colours.PresetColour;
 import com.lilithsthrone.world.Cell;
 
 /**
@@ -74,7 +71,7 @@ public class TunnelAttackDialogue {
 		List<GameCharacter> allCharacters = new ArrayList<>();
 		allCharacters.add(getMugger());
 		allCharacters.addAll(Main.game.getPlayer().getCompanions());
-		Collections.sort(allCharacters, (c1, c2) -> c1 instanceof Elemental?(c2 instanceof Elemental?0:1):(c2 instanceof Elemental?-1:0));
+		Collections.sort(allCharacters, (c1, c2) -> c1.isElemental()?(c2.isElemental()?0:1):(c2.isElemental()?-1:0));
 		return allCharacters;
 	}
 	
@@ -85,7 +82,7 @@ public class TunnelAttackDialogue {
 		if(Main.game.getPlayer().isVisiblyPregnant()) {
 			Main.game.getPlayer().setCharacterReactedToPregnancy(getMugger(), true);
 		}
-		if(getMainCompanion().isVisiblyPregnant()) {
+		if(isCompanionDialogue() && getMainCompanion().isVisiblyPregnant()) {
 			getMainCompanion().setCharacterReactedToPregnancy(getMugger(), true);
 		}
 	}
@@ -242,14 +239,16 @@ public class TunnelAttackDialogue {
 					};
 					
 				} else if (index == 2) {
-					if(Main.game.getPlayer().getMoney()<250) {
-						return new Response("Offer money ("+UtilText.formatAsMoney(250, "span")+")", "You don't have enough money to offer to pay [npc.name] off. You'll have to either fight [npc.herHim] or offer [npc.herHim] your body!", null);
+					if(Main.game.getPlayer().getMoney()<DialogueFlags.MUGGER_DEMAND_2) {
+						return new Response("Offer money ("+UtilText.formatAsMoney(DialogueFlags.MUGGER_DEMAND_2, "span")+")",
+								"You don't have enough money to offer to pay [npc.name] off. You'll have to either fight [npc.herHim] or offer [npc.herHim] your body!", null);
 					} else {
-						return new Response("Offer money ("+UtilText.formatAsMoney(250, "span")+")", "Offer to pay [npc.name] 250 flames to leave you alone.", Main.game.getDefaultDialogueNoEncounter()) {
+						return new Response("Offer money ("+UtilText.formatAsMoney(DialogueFlags.MUGGER_DEMAND_2, "span")+")",
+								"Offer to pay [npc.name] "+Util.intToString(DialogueFlags.MUGGER_DEMAND_2)+" flames to leave you alone.", Main.game.getDefaultDialogue(false)) {
 							@Override
 							public void effects() {
 								applyPregnancyReactions();
-								Main.game.getPlayer().incrementMoney(-250);
+								Main.game.getPlayer().incrementMoney(-DialogueFlags.MUGGER_DEMAND_2);
 								UtilText.nodeContentSB.append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "TUNNEL_ATTACK_PAY_OFF", getAllCharacters()));
 							}
 						};
@@ -260,7 +259,7 @@ public class TunnelAttackDialogue {
 						return new ResponseSex("Offer body", "Offer your body to [npc.name] so that you can avoid a violent confrontation.",
 								Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE), null, Fetish.FETISH_SUBMISSIVE.getAssociatedCorruptionLevel(),
 								null, null, null,
-								true, true,
+								true, false,
 								new SMGeneric(
 										Util.newArrayListOfValues(getMugger()),
 										Util.newArrayListOfValues(Main.game.getPlayer()),
@@ -275,7 +274,7 @@ public class TunnelAttackDialogue {
 									}
 								},
 								AFTER_SEX_DEFEAT,
-								UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "TUNNEL_ATTACK_OFFER_BODY_SOLO_WITH_COMPANION", getAllCharacters())) {
+								UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), isCompanionDialogue()?"TUNNEL_ATTACK_OFFER_BODY_SOLO_WITH_COMPANION":"TUNNEL_ATTACK_OFFER_BODY", getAllCharacters())) {
 							@Override
 							public void effects() {
 								applyPregnancyReactions();
@@ -299,9 +298,9 @@ public class TunnelAttackDialogue {
 								UtilText.parse(getMugger(), companion, "You can tell that [npc.name] isn't at all interested in having sex with [npc2.name], so wouldn't want to have a threesome..."),
 								null);
 						
-					} else if(!companion.isAttractedTo(getMugger()) && !companion.isSlave() && !(companion instanceof Elemental)) {
+					} else if(!companion.isAttractedTo(getMugger()) && companion.isAbleToRefuseSexAsCompanion()) {
 						return new Response(UtilText.parse(companion, "Offer threesome"),
-								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and as [npc2.sheIs] not your slave, you can't force [npc2.herHim] to have sex..."),
+								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and you can't force [npc2.herHim] to do so..."),
 								null);
 						
 					} else {
@@ -331,9 +330,9 @@ public class TunnelAttackDialogue {
 								UtilText.parse(getMugger(), companion, "You can tell that [npc.name] isn't at all interested in having sex with [npc2.name]..."),
 								null);
 						
-					} else if(!companion.isAttractedTo(getMugger()) && !companion.isSlave() && !(companion instanceof Elemental)) {
+					} else if(!companion.isAttractedTo(getMugger()) && companion.isAbleToRefuseSexAsCompanion()) {
 						return new Response(UtilText.parse(companion, "Offer [npc.name]"),
-								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and as [npc2.sheIs] not your slave, you can't force [npc2.herHim] to have sex..."),
+								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and you can't force [npc2.herHim] to do so..."),
 								null);
 						
 					} else {
@@ -375,16 +374,16 @@ public class TunnelAttackDialogue {
 					};
 					
 				} else if (index == 2) {
-					if(Main.game.getPlayer().getMoney()<250) {
-						return new Response("Offer money ("+UtilText.formatAsMoney(250, "span")+")",
+					if(Main.game.getPlayer().getMoney()<DialogueFlags.MUGGER_DEMAND_2) {
+						return new Response("Offer money ("+UtilText.formatAsMoney(DialogueFlags.MUGGER_DEMAND_2, "span")+")",
 								"You don't have enough money to offer [npc.name] any.", null);
 					} else {
-						return new Response("Offer money ("+UtilText.formatAsMoney(250, "span")+")",
+						return new Response("Offer money ("+UtilText.formatAsMoney(DialogueFlags.MUGGER_DEMAND_2, "span")+")",
 								"Offer [npc.name] some money to help [npc.herHim] buy food and clothing.", TUNNEL_PEACEFUL_OFFER_MONEY) {
 							@Override
 							public void effects() {
 								applyPregnancyReactions();
-								Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().incrementMoney(-250));
+								Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().incrementMoney(-DialogueFlags.MUGGER_DEMAND_2));
 								Main.game.getTextEndStringBuilder().append(getMugger().incrementAffection(Main.game.getPlayer(), 10));
 
 								if(getMugger().isAffectionHighEnoughToInviteHome() && !Main.game.getPlayer().hasQuest(QuestLine.SIDE_ACCOMMODATION)) {
@@ -478,9 +477,9 @@ public class TunnelAttackDialogue {
 								UtilText.parse(getMugger(), companion, "You can tell that [npc.name] isn't at all interested in having sex with [npc2.name], so wouldn't want to have a threesome..."),
 								null);
 						
-					} else if(!companion.isAttractedTo(getMugger()) && !companion.isSlave() && !(companion instanceof Elemental)) {
+					} else if(!companion.isAttractedTo(getMugger()) && companion.isAbleToRefuseSexAsCompanion()) {
 						return new Response(UtilText.parse(companion, "Offer threesome"),
-								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and as [npc2.sheIs] not your slave, you can't force [npc2.herHim] to have sex..."),
+								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and you can't force [npc2.herHim] to do so..."),
 								null);
 						
 					} else {
@@ -509,9 +508,9 @@ public class TunnelAttackDialogue {
 								UtilText.parse(getMugger(), companion, "You can tell that [npc.name] isn't at all interested in having sex with [npc2.name]..."),
 								null);
 						
-					} else if(!companion.isAttractedTo(getMugger()) && !companion.isSlave() && !(companion instanceof Elemental)) {
+					} else if(!companion.isAttractedTo(getMugger()) && companion.isAbleToRefuseSexAsCompanion()) {
 						return new Response(UtilText.parse(companion, "Offer [npc.name]"),
-								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and as [npc2.sheIs] not your slave, you can't force [npc2.herHim] to have sex..."),
+								UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and you can't force [npc2.herHim] to do so..."),
 								null);
 						
 					} else {
@@ -549,7 +548,7 @@ public class TunnelAttackDialogue {
 					};
 					
 				} else if (index == 0) {
-					return new Response("Leave", "Tell [npc.name] that you're in a rush to be somewhere else, before continuing on your way.", Main.game.getDefaultDialogueNoEncounter());
+					return new Response("Leave", "Tell [npc.name] that you're in a rush to be somewhere else, before continuing on your way.", Main.game.getDefaultDialogue(false));
 					
 				} else {
 					return null;
@@ -582,7 +581,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Let [npc.name] go.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Continue", "Let [npc.name] go.", Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -614,7 +613,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Let [npc.name] go and buy food.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Continue", "Let [npc.name] go and buy food.", Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -659,7 +658,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Let [npc.name] get settled in.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Continue", "Let [npc.name] get settled in.", Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -699,7 +698,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -717,7 +716,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -739,7 +738,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -772,7 +771,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Carry on your way...", Main.game.getDefaultDialogueNoEncounter()){
+				return new Response("Continue", "Carry on your way...", Main.game.getDefaultDialogue(false)){
 					@Override
 					public void effects() {
 						if(getMugger().hasFlag(NPCFlagValue.genericNPCBetrayedByPlayer)) {
@@ -878,7 +877,7 @@ public class TunnelAttackDialogue {
 			} else if (index == 5) {
 				if(!getMugger().isAttractedTo(Main.game.getPlayer())) {
 					return new Response("Submit",
-							"You can't submit to [npc.herHim], as [npc.she] has no interest in having sex with you!",
+							"You can't submit to [npc.herHim], as [npc.sheHasFull] no interest in having sex with you!",
 							null);
 				} else {
 					return new ResponseSex("Submit",
@@ -936,8 +935,13 @@ public class TunnelAttackDialogue {
 			} else if (index == 10 && !getMugger().hasFlag(NPCFlagValue.genericNPCBetrayedByPlayer)) {
 				return new Response(
 						"Remove character",
-						"Scare [npc.name] away. <b>This will remove [npc.herHim] from this area, allowing another character to move into this tile.</b>",
-						Main.game.getDefaultDialogueNoEncounter()){
+						UtilText.parse(getMugger(), "Scare [npc.name] away."
+								+ "<br/>[style.italicsBad(This will permanently remove [npc.herHim] from the game!)]"),
+						Main.game.getDefaultDialogue(false)){
+					@Override
+					public Colour getHighlightColour() {
+						return PresetColour.GENERIC_NPC_REMOVAL;
+					}
 					@Override
 					public void effects() {
 						Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_COMBAT_VICTORY_BANISH_NPC", getAllCharacters()));
@@ -997,9 +1001,9 @@ public class TunnelAttackDialogue {
 				} else if(!getMugger().isAttractedTo(companion)) {
 					return new Response(UtilText.parse(companion, "Offer [npc.name]"), UtilText.parse(companion, getMugger(), "[npc2.Name] has no interest in having sex with [npc.name]!"), null);
 					
-				} else if(!companion.isAttractedTo(getMugger()) && !companion.isSlave() && !(companion instanceof Elemental)) {
+				} else if(!companion.isAttractedTo(getMugger()) && companion.isAbleToRefuseSexAsCompanion()) {
 					return new Response(UtilText.parse(companion, "Offer [npc.name]"),
-							UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and as [npc2.sheIs] not your slave, you can't force [npc2.herHim] to have sex..."),
+							UtilText.parse(getMugger(), companion, "You can tell that [npc2.name] isn't at all interested in having sex with [npc.name], and you can't force [npc2.herHim] to do so..."),
 							null);
 					
 				} else {
@@ -1038,7 +1042,7 @@ public class TunnelAttackDialogue {
 			if (index == 1) {
 				return new Response("Continue",
 						"Let [npc.name] go.",
-						Main.game.getDefaultDialogueNoEncounter());
+						Main.game.getDefaultDialogue(false));
 				
 			} else {
 				return null;
@@ -1047,28 +1051,20 @@ public class TunnelAttackDialogue {
 	};
 
 	private static String applyTransformation(GameCharacter target,
-			Value<AbstractItemType, Map<ItemEffect,String>> potion,
+			TransformativePotion potion,
 			boolean forcedTF,
-			Value<AbstractItemType, Map<ItemEffect,String>> fetishPotion,
+			FetishPotion fetishPotion,
 			boolean forcedFetish) {
 		
 		StringBuilder sb = new StringBuilder();
 		
 		if(potion!=null && forcedTF) {
-			sb.append(UtilText.parse(getMugger(),
+			sb.append(UtilText.parse(getMugger(), target,
 					"<p>"
-						+ "[npc.Name] steps back, grinning down at you as you obediently swallow the strange liquid."
-						+ " [npc.speech(Good [pc.girl]! I'm going to turn you into my perfect "+getMugger().getPreferredBodyDescription("b")+"!)]"
+						+ "[npc.Name] steps back, grinning down at [npc2.name] as [npc2.she] obediently [npc2.verb(swallow)] the strange liquid."
+						+ " [npc.speech(Good [npc2.girl]! I'm going to turn you into my perfect "+getMugger().getPreferredBodyDescription("b")+"!)]"
 					+ "</p>"));
-			for(Entry<ItemEffect, String> e : potion.getValue().entrySet()) {
-				sb.append(UtilText.parse(getMugger(),
-						(e.getValue()!=null && !e.getValue().isEmpty()
-							?"<p>"
-								+ "[npc.speech("+e.getValue()+")]"
-							+ "</p>"
-							:"")
-						+ e.getKey().applyEffect(getMugger(), target, 1)));
-			}
+			sb.append(getMugger().applyPotion(potion, target));
 		}
 		
 		if(fetishPotion!=null && forcedFetish) {
@@ -1077,25 +1073,17 @@ public class TunnelAttackDialogue {
 						+ "With a look of fiendish delight in [npc.her] [npc.eyes], [npc.name] excitedly cries out,"
 						+ " [npc.speech(That's right, swallow it all down! These changes are all for the better!)]"
 					+ "</p>"));
-			for(Entry<ItemEffect, String> e : fetishPotion.getValue().entrySet()) {
-				sb.append(UtilText.parse(getMugger(),
-						(e.getValue()!=null && !e.getValue().isEmpty()
-							?"<p>"
-								+ "[npc.speech("+e.getValue()+")]"
-							+ "</p>"
-							:"")
-						+ e.getKey().applyEffect(getMugger(), target, 1)));
-			}
+			sb.append(getMugger().applyPotion(fetishPotion, target));
 		}
 		return sb.toString();
 	}
 	
 	public static final DialogueNode AFTER_COMBAT_DEFEAT = new DialogueNode("Defeat", "", true) {
 
-		Value<AbstractItemType, Map<ItemEffect,String>> potion = null;
-		Value<AbstractItemType, Map<ItemEffect,String>> companionPotion = null;
-		Value<AbstractItemType, Map<ItemEffect,String>> fetishPotion = null;
-		Value<AbstractItemType, Map<ItemEffect,String>> companionFetishPotion = null;
+		TransformativePotion potion = null;
+		TransformativePotion companionPotion = null;
+		FetishPotion fetishPotion = null;
+		FetishPotion companionFetishPotion = null;
 		
 		public void applyPreParsingEffects() {
 			transformationsApplied = false;
@@ -1169,7 +1157,7 @@ public class TunnelAttackDialogue {
 						if(potion!=null && forcedTF) {
 							sb.append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_COMBAT_DEFEAT_TF_AND_FETISH", getAllCharacters()));
 						} else {
-							sb.append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_COMBAT_DEFEAT_TF_FETISH", getAllCharacters()));
+							sb.append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_COMBAT_DEFEAT_FETISH", getAllCharacters()));
 						}
 					} else {
 						sb.append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_COMBAT_DEFEAT_TF", getAllCharacters()));
@@ -1200,7 +1188,7 @@ public class TunnelAttackDialogue {
 		public Response getResponse(int responseTab, int index) {
 			if(getMugger().hasFlag(NPCFlagValue.genericNPCBetrayedByPlayer)) {
 				if (index == 1) {
-					return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogueNoEncounter()) {
+					return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogue(false)) {
 						@Override
 						public void effects() {
 							Main.game.banishNPC(getMugger());
@@ -1307,7 +1295,7 @@ public class TunnelAttackDialogue {
 					if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)) {
 						return new Response("Spit (both)",
 								UtilText.parse(getMainCompanion(),
-									"Due to your <b style='color:"+Colour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
+									"Due to your <b style='color:"+PresetColour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
 										+"</b> fetish, you love being transformed so much that you can't bring yourself to spit out the transformative "+(multiplePotions?"potions":"potion")+", nor to tell [npc.name] to do so!"),
 								null);
 						
@@ -1376,7 +1364,7 @@ public class TunnelAttackDialogue {
 					};
 					if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)) {
 						return new Response("Spit",
-								"Due to your <b style='color:"+Colour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
+								"Due to your <b style='color:"+PresetColour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
 									+"</b> fetish, you love being transformed so much that you can't bring yourself to spit out the transformative "+(multiplePotions?"potions":"potion")+"!",
 								null);
 					} else {
@@ -1620,7 +1608,7 @@ public class TunnelAttackDialogue {
 						} else if (index == 4 && !getMugger().isWillingToRape()) {
 							return new Response("Refuse",
 									UtilText.parse(getMugger(), "Refuse to have sex with [npc.name] and continue on your way."),
-									Main.game.getDefaultDialogueNoEncounter()) {
+									Main.game.getDefaultDialogue(false)) {
 								@Override
 								public void effects() {
 									Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "DEFEATED_REFUSE_THREESOME", getAllCharacters()));
@@ -1677,7 +1665,7 @@ public class TunnelAttackDialogue {
 						} else if (index == 4 && !getMugger().isWillingToRape()) {
 							return new Response("Refuse",
 									UtilText.parse(getMugger(), "Refuse to have sex with [npc.name] and continue on your way."),
-									Main.game.getDefaultDialogueNoEncounter()) {
+									Main.game.getDefaultDialogue(false)) {
 								@Override
 								public void effects() {
 									Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "DEFEATED_REFUSE_SEX_SOLO", getAllCharacters()));
@@ -1723,7 +1711,7 @@ public class TunnelAttackDialogue {
 						return new Response(
 								UtilText.parse(getMainCompanion(), "[npc.Name] refuses"),
 								UtilText.parse(getMugger(), getMainCompanion(), "It looks like [npc2.name] is going to refuse to have sex with [npc.name]."),
-								Main.game.getDefaultDialogueNoEncounter()) {
+								Main.game.getDefaultDialogue(false)) {
 							@Override
 							public void effects() {
 								Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "DEFEATED_REFUSE_SEX_SOLO_COMPANION", getAllCharacters()));
@@ -1781,7 +1769,7 @@ public class TunnelAttackDialogue {
 					} else if (index == 4 && !getMugger().isWillingToRape()) {
 						return new Response("Refuse",
 								UtilText.parse(getMugger(), "Refuse to have sex with [npc.name] and continue on your way."),
-								Main.game.getDefaultDialogueNoEncounter()) {
+								Main.game.getDefaultDialogue(false)) {
 							@Override
 							public void effects() {
 								Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "DEFEATED_REFUSE_SEX", getAllCharacters()));
@@ -1792,7 +1780,7 @@ public class TunnelAttackDialogue {
 				}
 			}
 			if (index == 1) {
-				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogueNoEncounter()) {
+				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogue(false)) {
 					@Override
 					public void effects() {
 						Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "DEFEATED_NO_SEX", getAllCharacters()));
@@ -1816,7 +1804,7 @@ public class TunnelAttackDialogue {
 		public String getContent() {
 			if((getMugger().isAttractedTo(Main.game.getPlayer()) || !Main.game.isNonConEnabled())
 					&& !getMugger().hasFlag(NPCFlagValue.genericNPCBetrayedByPlayer)) {
-				if(Sex.getNumberOfOrgasms(getMugger()) >= getMugger().getOrgasmsBeforeSatisfied()) {
+				if(Main.sex.getNumberOfOrgasms(getMugger()) >= getMugger().getOrgasmsBeforeSatisfied()) {
 					return UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_SEX_VICTORY", getAllCharacters());
 				} else {
 					return UtilText.parseFromXMLFile("encounters/submission/"+getDialogueId(), "AFTER_SEX_VICTORY_NO_ORGASM", getAllCharacters());
@@ -1834,7 +1822,7 @@ public class TunnelAttackDialogue {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogueNoEncounter()){
+				return new Response("Continue", "Carry on your way.", Main.game.getDefaultDialogue(false)){
 					@Override
 					public void effects() {
 						if(getMugger().hasFlag(NPCFlagValue.genericNPCBetrayedByPlayer)) {
@@ -1854,11 +1842,16 @@ public class TunnelAttackDialogue {
 			} else if (index == 10 && !getMugger().hasFlag(NPCFlagValue.genericNPCBetrayedByPlayer)) {
 				return new Response(
 						"Remove character",
-						"Scare [npc.name] away. <b>This will remove [npc.herHim] from this area, allowing another character to move into this tile.</b>",
+						UtilText.parse(getMugger(), "Scare [npc.name] away."
+								+ "<br/>[style.italicsBad(This will permanently remove [npc.herHim] from the game!)]"),
 						AFTER_COMBAT_VICTORY){
 					@Override
+					public Colour getHighlightColour() {
+						return PresetColour.GENERIC_NPC_REMOVAL;
+					}
+					@Override
 					public DialogueNode getNextDialogue() {
-						return Main.game.getDefaultDialogueNoEncounter();
+						return Main.game.getDefaultDialogue(false);
 					}
 					@Override
 					public void effects() {
@@ -1901,7 +1894,7 @@ public class TunnelAttackDialogue {
 					}
 					@Override
 					public DialogueNode getNextDialogue(){
-						return Main.game.getDefaultDialogueNoEncounter();
+						return Main.game.getDefaultDialogue(false);
 					}
 				};
 				

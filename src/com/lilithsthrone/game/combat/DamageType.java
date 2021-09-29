@@ -1,12 +1,14 @@
 package com.lilithsthrone.game.combat;
 
 import com.lilithsthrone.game.character.GameCharacter;
+import com.lilithsthrone.game.character.attributes.AbstractAttribute;
 import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.effects.StatusEffect;
 import com.lilithsthrone.game.character.fetishes.Fetish;
-import com.lilithsthrone.game.character.npc.misc.Elemental;
-import com.lilithsthrone.utils.Colour;
+import com.lilithsthrone.game.combat.spells.SpellSchool;
 import com.lilithsthrone.utils.Util.Value;
+import com.lilithsthrone.utils.colours.Colour;
+import com.lilithsthrone.utils.colours.PresetColour;
 
 /**
  * @since 0.1.0
@@ -16,7 +18,7 @@ import com.lilithsthrone.utils.Util.Value;
 public enum DamageType {
 
 	HEALTH("health",
-			Colour.ATTRIBUTE_HEALTH,
+			PresetColour.ATTRIBUTE_HEALTH,
 			"health damaging",
 			Attribute.ENERGY_SHIELDING,
 			Attribute.HEALTH_MAXIMUM,
@@ -24,7 +26,7 @@ public enum DamageType {
 			null),
 
 	PHYSICAL("physical",
-			Colour.DAMAGE_TYPE_PHYSICAL,
+			PresetColour.DAMAGE_TYPE_PHYSICAL,
 			"forceful",
 			Attribute.RESISTANCE_PHYSICAL,
 			Attribute.DAMAGE_PHYSICAL,
@@ -32,7 +34,7 @@ public enum DamageType {
 			DamageType.HEALTH),
 	
 	ICE("ice",
-			Colour.DAMAGE_TYPE_COLD,
+			PresetColour.DAMAGE_TYPE_COLD,
 			"freezing",
 			Attribute.RESISTANCE_ICE,
 			Attribute.DAMAGE_ICE,
@@ -40,7 +42,7 @@ public enum DamageType {
 			DamageType.HEALTH),
 	
 	FIRE("fire",
-			Colour.DAMAGE_TYPE_FIRE,
+			PresetColour.DAMAGE_TYPE_FIRE,
 			"burning",
 			Attribute.RESISTANCE_FIRE,
 			Attribute.DAMAGE_FIRE,
@@ -48,7 +50,7 @@ public enum DamageType {
 			DamageType.HEALTH),
 	
 	POISON("poison",
-			Colour.DAMAGE_TYPE_POISON,
+			PresetColour.DAMAGE_TYPE_POISON,
 			"poisoned",
 			Attribute.RESISTANCE_POISON,
 			Attribute.DAMAGE_POISON,
@@ -56,7 +58,7 @@ public enum DamageType {
 			DamageType.HEALTH),
 
 	UNARMED("unarmed",
-			Colour.DAMAGE_TYPE_PHYSICAL,
+			PresetColour.DAMAGE_TYPE_PHYSICAL,
 			"unarmed",
 			Attribute.RESISTANCE_PHYSICAL,
 			Attribute.DAMAGE_PHYSICAL,
@@ -76,7 +78,7 @@ public enum DamageType {
 				return FIRE;
 			}
 
-			if(source instanceof Elemental) {
+			if(source.isElemental()) {
 				switch(source.getBodyMaterial()) {
 					case AIR:
 						return POISON;
@@ -103,7 +105,7 @@ public enum DamageType {
 	},
 
 	LUST("lust",
-			Colour.DAMAGE_TYPE_LUST,
+			PresetColour.DAMAGE_TYPE_LUST,
 			"arousing",
 			Attribute.RESISTANCE_LUST,
 			Attribute.DAMAGE_LUST,
@@ -125,7 +127,7 @@ public enum DamageType {
 	},
 	
 	MISC("generic",
-			Colour.DAMAGE_TYPE_PHYSICAL,
+			PresetColour.DAMAGE_TYPE_PHYSICAL,
 			"standard",
 			Attribute.RESISTANCE_PHYSICAL,
 			Attribute.DAMAGE_PHYSICAL,
@@ -135,12 +137,12 @@ public enum DamageType {
 	private String name;
 	private Colour colour;
 	private String weaponDescriptor;
-	private Attribute resistAttribute;
-	private Attribute multiplierAttribute;
+	private AbstractAttribute resistAttribute;
+	private AbstractAttribute multiplierAttribute;
 	private SpellSchool spellSchool;
 	private DamageType parentDamageType;
 
-	private DamageType(String name, Colour colour, String weaponDescriptor, Attribute resistAttribute, Attribute multiplierAttribute, SpellSchool spellSchool, DamageType parentDamageType) {
+	private DamageType(String name, Colour colour, String weaponDescriptor, AbstractAttribute resistAttribute, AbstractAttribute multiplierAttribute, SpellSchool spellSchool, DamageType parentDamageType) {
 		this.name = name;
 		this.colour = colour;
 		this.weaponDescriptor = weaponDescriptor;
@@ -162,11 +164,11 @@ public enum DamageType {
 		return weaponDescriptor;
 	}
 
-	public Attribute getResistAttribute() {
+	public AbstractAttribute getResistAttribute() {
 		return resistAttribute;
 	}
 
-	public Attribute getMultiplierAttribute() {
+	public AbstractAttribute getMultiplierAttribute() {
 		return multiplierAttribute;
 	}
 
@@ -186,7 +188,7 @@ public enum DamageType {
 //		if(damageAmount > 0) {
 			description = target.incrementHealth(source, -damageAmount);
 //		}
-		if(target.hasFetish(Fetish.FETISH_MASOCHIST)) {
+		if(target.hasFetish(Fetish.FETISH_MASOCHIST)) { // Change damageAmount after health damage applied, as the 75% damage taken effect is handled within the incrementHealth method itself.
 			damageAmount*=0.75f;
 		}
 		return new Value<>(description, damageAmount);
@@ -201,7 +203,12 @@ public enum DamageType {
 			damageAmount = this.getParentDamageType(source, target).shieldCheckNoDamage(source, target, damageAmount);
 		}
 		if(target.getShields(this) > 0) {
-			damageAmount -= target.getShields(this);
+			AbstractAttribute resist = this.getResistAttribute();
+			if(target.getAttributeValue(resist)>=resist.getUpperLimit() && resist.isInfiniteAtUpperLimit()) {
+				damageAmount = 0;
+			} else {
+				damageAmount -= target.getShields(this);
+			}
 			if(damageAmount < 0) {
 				damageAmount = 0;
 			}
@@ -219,9 +226,14 @@ public enum DamageType {
 				damageAmount = this.getParentDamageType(source, target).shieldCheck(source, target, damageAmount);
 			}
 			if(target.getShields(this) > 0) {
-				int oldShields = target.getShields(this);
-				target.setShields(this, target.getShields(this) - damageAmount);
-				damageAmount -= oldShields;
+				AbstractAttribute resist = this.getResistAttribute();
+				if(target.getAttributeValue(resist)>=resist.getUpperLimit() && resist.isInfiniteAtUpperLimit()) {
+					damageAmount = 0;
+				} else {
+					int oldShields = target.getShields(this);
+					target.setShields(this, target.getShields(this) - damageAmount);
+					damageAmount -= oldShields;
+				}
 				if(damageAmount < 0) {
 					damageAmount = 0;
 				}
