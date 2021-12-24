@@ -2909,6 +2909,184 @@ public enum SexAreaPenetration implements SexAreaInterface {
 			}
 			return UtilText.parse(performer, target, sb.toString());
 		}
+	},
+
+	HAND(1, 0, false) {
+		@Override
+		public String getName(GameCharacter owner, boolean standardName) {
+			if(standardName) {
+				return "hand";
+			}
+			return owner.getArmType().getHandsNamePlural(owner);
+		}
+		@Override
+		public boolean isPlural() {
+			return true;
+		}
+		@Override
+		public int getLength(GameCharacter owner, boolean penetrationLength) {
+			System.err.println("Warning: Hand length is being called!");
+			return 8;
+		}
+		@Override
+		public boolean isFree(GameCharacter owner) {
+			return Main.sex.isPenetrationTypeFree(owner, this);
+		}
+		@Override
+		public CoverableArea getRelatedCoverableArea(GameCharacter owner) {
+			return CoverableArea.NONE;
+		}
+		@Override
+		public InventorySlot getRelatedInventorySlot(GameCharacter owner) {
+			return InventorySlot.HAND;
+		}
+		@Override
+		public String getSexDescription(boolean pastTense, GameCharacter performer, SexPace performerPace, GameCharacter target, SexPace targetPace, SexAreaInterface targetArea) {
+			StringBuilder sb = new StringBuilder();
+			if(performer==target) {
+				System.err.println("SexAreaPenetration.HAND getSexDescription() error: Does not support self actions!");
+				return "";
+			}
+			
+			if(targetArea.isPenetration()) {
+				switch((SexAreaPenetration)targetArea) {
+					case CLIT:
+						break;
+					case FINGER:
+						break;
+					case FOOT:
+						break;
+					case PENIS:
+						break;
+					case TAIL:
+						break;
+					case TENTACLE:
+						break;
+					case TONGUE:
+						break;
+				}
+				
+			} else {
+				switch((SexAreaOrifice)targetArea) {
+					case ARMPITS:
+						break;
+					case ANUS:
+						if(pastTense) {
+							switch(performerPace) {
+								case DOM_GENTLE:
+								case DOM_NORMAL:
+								case SUB_EAGER:
+								case SUB_NORMAL:
+								case DOM_ROUGH:
+									sb.append("Grabbing [npc2.namePos] [npc2.ass], [npc.name] ran [npc.her] [npc.hand] down to [npc2.her] [npc2.asshole+] and, slipping it inside, started to [npc.sexPaceVerb] fist [npc2.her] [npc2.ass].");
+									break;
+								case SUB_RESISTING:
+									sb.append("[npc.Name] struggled and cried as [npc2.name] grabbed hold of [npc.her] [npc.hand] and forced [npc.her] [npc.hand] into [npc2.her] [npc2.asshole+].");
+									break;
+							}
+							switch(targetPace) {
+								case DOM_GENTLE:
+								case DOM_NORMAL:
+								case SUB_EAGER:
+								case SUB_NORMAL:
+								case DOM_ROUGH:
+									sb.append(" Letting out a series of [npc2.moans+], [npc2.name] pushed [npc2.her] [npc2.hips] back against [npc.namePos] touch, helping to drive [npc.her] [npc.hand] deep into [npc2.her] [npc2.asshole].");
+									break;
+								case SUB_RESISTING:
+									sb.append(" [npc2.Name] tried to pull [npc2.her] [npc2.ass] away from [npc.namePos] unwelcome [npc.hand], but [npc2.her] efforts proved to be in vain.");
+									break;
+							}
+							
+						} else {
+							sb.append("[npc.NameIs] [npc.sexPaceVerb] fisting [npc2.namePos] [npc2.asshole].");
+						}
+						break;
+					case ASS:
+						break;
+					case BREAST:
+						break;
+					case BREAST_CROTCH:
+						break;
+					case MOUTH:
+						break;
+					case NIPPLE:
+						break;
+					case NIPPLE_CROTCH:
+						break;
+					case THIGHS:
+						break;
+					case URETHRA_PENIS:
+						break;
+					case URETHRA_VAGINA:
+						break;
+					case VAGINA:
+						if(pastTense) {
+							switch(performerPace) {
+								case DOM_GENTLE:
+								case DOM_NORMAL:
+								case SUB_EAGER:
+								case SUB_NORMAL:
+								case DOM_ROUGH:
+									sb.append("Dropping [npc.her] [npc.hand] down between [npc2.namePos] [npc2.legs], [npc.name] ran [npc.her] [npc.fingers+] over [npc2.her] [npc2.labia+] and,"
+											+ " slipping them all inside, started to [npc.sexPaceVerb] fist [npc2.her] [npc2.pussy+].");
+									break;
+								case SUB_RESISTING:
+									sb.append("[npc.Name] struggled and cried as [npc2.name] grabbed hold of [npc.her] [npc.hand] and forced [npc.her] [npc.hand] into [npc2.her] [npc2.pussy+].");
+									break;
+							}
+							switch(targetPace) {
+								case DOM_GENTLE:
+								case DOM_NORMAL:
+								case SUB_EAGER:
+								case SUB_NORMAL:
+								case DOM_ROUGH:
+									sb.append(" Letting out a series of [npc2.moans+], [npc2.name] pushed [npc2.her] [npc2.hips] back against [npc.namePos] touch, helping to drive [npc.her] [npc.hand] deep into [npc2.her] [npc2.pussy+].");
+									break;
+								case SUB_RESISTING:
+									sb.append(" [npc2.Name] tried to pull [npc2.her] [npc2.hips] away from [npc.namePos] unwelcome [npc.hand], but [npc2.her] efforts proved to be in vain.");
+									break;
+							}
+							
+						} else {
+							sb.append("[npc.NameIs] [npc.sexPaceVerb] fisting [npc2.namePos] [npc2.pussy+].");
+						}
+						break;
+					case SPINNERET:
+						if(pastTense) {
+							switch(performerPace) {
+								case DOM_GENTLE:
+								case DOM_NORMAL:
+								case SUB_EAGER:
+								case SUB_NORMAL:
+								case DOM_ROUGH:
+									sb.append("Dropping [npc.her] hand down towards [npc2.namePos] spinneret, [npc.name] ran [npc.her] [npc.hand] over [npc2.her] web-spinning orifice and,"
+											+ " slipping it inside, started to [npc.sexPaceVerb] fist [npc2.herHim]");
+									break;
+								case SUB_RESISTING:
+									sb.append("[npc.Name] struggled and cried as [npc2.name] grabbed hold of [npc.her] [npc.hand] and forced [npc.her] it into [npc2.her] spinneret.");
+									break;
+							}
+							switch(targetPace) {
+								case DOM_GENTLE:
+								case DOM_NORMAL:
+								case SUB_EAGER:
+								case SUB_NORMAL:
+								case DOM_ROUGH:
+									sb.append(" Letting out a series of [npc2.moans+], [npc2.name] pushed [npc2.her] spinneret back against [npc.namePos] touch, helping to drive [npc.her] [npc.hand] deep into [npc2.her] web-spinning orifice.");
+									break;
+								case SUB_RESISTING:
+									sb.append(" [npc2.Name] tried to pull [npc2.her] spinneret away from [npc.namePos] unwelcome [npc.hand], but [npc2.her] efforts proved to be in vain.");
+									break;
+							}
+							
+						} else {
+							sb.append("[npc.NameIs] [npc.sexPaceVerb] fisting [npc2.namePos] spinneret.");
+						}
+						break;
+				}
+			}
+			return UtilText.parse(performer, target, sb.toString());
+		}
 	};
 	
 //	TOY(4, -2f, false) {
