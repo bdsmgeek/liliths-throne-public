@@ -19,7 +19,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@master
       - name: Get the version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: |
+          export VERSION=${GITHUB_REF/refs\/tags\//}
+          echo ::set-output name=VERSION::${VERSION}
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Bundle Resources
