@@ -139,6 +139,7 @@ public class DialogueFlagValue {
 	public static AbstractDialogueFlagValue auntHomeJustEntered = new AbstractDialogueFlagValue();
 	public static AbstractDialogueFlagValue hadSexWithLilaya = new AbstractDialogueFlagValue();
 	public static AbstractDialogueFlagValue lilayaCondomBroke = new AbstractDialogueFlagValue();
+	public static AbstractDialogueFlagValue lilayaAmazonsSecretImpregnation = new AbstractDialogueFlagValue();
 	public static AbstractDialogueFlagValue reactedToPregnancyLilaya = new AbstractDialogueFlagValue();
 	public static AbstractDialogueFlagValue waitingOnLilayaPregnancyResults = new AbstractDialogueFlagValue();
 	public static AbstractDialogueFlagValue waitingOnLilayaBirthNews = new AbstractDialogueFlagValue();
@@ -442,6 +443,8 @@ public class DialogueFlagValue {
 
 	public static AbstractDialogueFlagValue murkLectured = new AbstractDialogueFlagValue(true);
 	public static AbstractDialogueFlagValue murkSpanked = new AbstractDialogueFlagValue(true);
+
+	public static AbstractDialogueFlagValue milkersClaireDialogue = new AbstractDialogueFlagValue(false);
 	
 	
 	//Felicia
@@ -484,6 +487,10 @@ public class DialogueFlagValue {
 		if(id.equals("ratWarrensRaid")
 				|| id.equals("suppliersTriedConvincing")) {
 			return null;
+		}
+		
+		if(id.equals("innoxia_elis_alleyway_transformations_applied")) {
+			id = "innoxia_alleyway_transformations_applied";
 		}
 		
 		id = Util.getClosestStringMatch(id, idToDialogueFlagValueMap.keySet(), 3);

@@ -1640,6 +1640,7 @@ public class Subspecies {
 			body.getCoverings().put(BodyCoveringType.FOX_FUR, new Covering(BodyCoveringType.FOX_FUR, CoveringPattern.NONE, PresetColour.COVERING_WHITE, false, PresetColour.COVERING_WHITE, false));
 			body.getCoverings().put(BodyCoveringType.HAIR_FOX_FUR, new Covering(BodyCoveringType.HAIR_FOX_FUR, CoveringPattern.NONE, PresetColour.COVERING_WHITE, false, PresetColour.COVERING_WHITE, false));
 			body.getCoverings().put(BodyCoveringType.BODY_HAIR_FOX_FUR, new Covering(BodyCoveringType.BODY_HAIR_FOX_FUR, CoveringPattern.NONE, PresetColour.COVERING_WHITE, false, PresetColour.COVERING_WHITE, false));
+			body.updateCoverings(false, false, true, true);
 		}
 
 		@Override
@@ -1966,6 +1967,7 @@ public class Subspecies {
 			if(body.getTail().getType()==TailType.FOX_MORPH) {
 				body.getTail().setType(null, TailType.FOX_MORPH_MAGIC);
 			}
+			body.updateCoverings(false, false, true, true);
 		}
 		
 		@Override
@@ -5551,7 +5553,7 @@ public class Subspecies {
 		}
 		@Override
 		public String getSVGString(GameCharacter character) {
-			if(character!=null && !((Elemental)character).getSummoner().isElementalActive()) {
+			if(character!=null && (character instanceof Elemental) && ((Elemental)character).getSummoner()!=null && !((Elemental)character).getSummoner().isElementalActive()) {
 				if(((Elemental)character).getPassiveForm()==null) {
 					String wispSVG = SvgUtil.colourReplacement(Subspecies.getIdFromSubspecies(ELEMENTAL_ARCANE),
 									this.getColour(character),
